@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Load a basic WebMap and swap with another on the same View - 4.0</title>
+
+    <style>
+        html,
+        body {
+            font-family: sans-serif;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #viewDiv {
+            position: absolute;
+            right: 0;
+            left: 0;
+            top: 60px;
+            bottom: 0;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 10%;
+        }
+
+        .btns {
+            margin: 0 auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+        }
+
+        .btn-switch {
+            flex-grow: 4;
+            background-color: rgba(34, 111, 14, 0.5);
+            color: #FFF;
+            margin: 1px;
+            width: 50%;
+            padding: 20px;
+            overflow: auto;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.7em;
+        }
+
+        .active-map {
+            color: #fff;
+            background-color: rgba(34, 111, 14, 1);
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.0/esri/css/main.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.0/esri/css/calcite/calcite.css">
+
+    <script src="https://js.arcgis.com/4.10/"></script>
+
+    <script>
+        require([
+            "esri/views/MapView",
+            "esri/WebMap",
+            "dojo/on",
+            "dojo/domReady!"
+        ], function(
+                MapView, WebMap,
+                on
+        ) {
+
+            var webmapids = [
+                "d53d08426ab1417a99edd9e9f8062b15",
+                "e6f70c0749f5417bbb6670a175c8ebc4",
+                "df2ec2a7630b4af6bf96e99ee7fdb21e"
+            ];
+
+            /************************************************************
+             * Create multiple WebMap instances
+             ************************************************************/
+            var webmaps = webmapids.map(function(webmapid) {
+                return new WebMap({
+                    portalItem: {
+                        id: webmapid
+                    }
+                });
+            });
+
+            /************************************************************
+             * Initialize the View with the first WebMap
+             ************************************************************/
+            var view = new MapView({
+                map: webmaps[0],
+                container: "viewDiv"
+            });
+            on(document.querySelector(".btns"), ".btn-switch:click", function(e) {
+                /************************************************************
+                 * On a button click, change the map of the View
+                 ************************************************************/
+                var id = e.target.getAttribute("data-id");
+                if (id) {
+                    var webmap = webmaps[id];
+                    view.map = webmap;
+                    var nodes = document.querySelectorAll(".btn-switch");
+                    for (var idx = 0; idx < nodes.length; idx++) {
+                        var node = nodes[idx];
+                        var mapIndex = node.getAttribute("data-id");
+                        if (mapIndex === id) {
+                            node.classList.add("active-map");
+                        } else {
+                            node.classList.remove("active-map");
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+
+<body class="calcite">
+<section class="header">
+    <div class="btns">
+        <div class="btn-switch active-map" data-id="0">National (Top 100)</div>
+        <div class="btn-switch" data-id="1">Regional (Top 25)</div>
+        <div class="btn-switch" data-id="2">States (Top 10)</div>
+    </div>
+</section>
+<div id="viewDiv"></div>
+</body>
+
+</html>
